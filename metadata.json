@@ -1,0 +1,6 @@
+{
+  "name": "Tariq Sweets & Bakes",
+  "description": "Premium Pakistani mithai, freshly baked artisan cakes, bakery specialties, and luxury festive gift boxes with Cash on Delivery and instant WhatsApp ordering.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
