@@ -7,7 +7,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
   Clock,
-  Heart,
+  Database,
   MapPin,
   Menu,
   MessageCircle,
@@ -26,8 +26,10 @@ import { CustomOrderModal } from './components/CustomOrderModal.tsx';
 import { ProductCard } from './components/ProductCard.tsx';
 import { ProductDetailModal } from './components/ProductDetailModal.tsx';
 import { ResilientImage } from './components/ResilientImage.tsx';
+import { SupabaseConnectModal } from './components/SupabaseConnectModal.tsx';
 import { TrackOrderModal } from './components/TrackOrderModal.tsx';
 import { createSeedData, IMAGE_ASSETS } from './data/seedCatalog.ts';
+import { getSavedSupabaseConfig } from './lib/supabaseClient.ts';
 import { fetchBootstrap, submitReview } from './services/api.ts';
 import {
   PRODUCT_CATEGORIES,
@@ -68,6 +70,8 @@ export default function App() {
   const [cartOpen, setCartOpen] = useState(false);
   const [trackModalOpen, setTrackModalOpen] = useState(false);
   const [customOrderOpen, setCustomOrderOpen] = useState(false);
+  const [supabaseModalOpen, setSupabaseModalOpen] = useState(false);
+  const [supabaseConnected, setSupabaseConnected] = useState(Boolean(getSavedSupabaseConfig()));
   const [recentOrderNumber, setRecentOrderNumber] = useState<string | undefined>(undefined);
   const [copiedCoupon, setCopiedCoupon] = useState<string | null>(null);
 
@@ -403,6 +407,8 @@ export default function App() {
         <AdminDashboard
           onExitAdmin={() => setView('store')}
           onStoreUpdated={() => void refreshStore()}
+          onOpenSupabaseModal={() => setSupabaseModalOpen(true)}
+          supabaseConnected={supabaseConnected}
         />
       ) : (
         <main id="top" className="flex-1">
@@ -977,6 +983,14 @@ export default function App() {
             >
               Admin Dashboard
             </button>
+            <button
+              type="button"
+              onClick={() => setSupabaseModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FAF5EB]/10 border border-[#E5A93B]/35 text-[#E5A93B] hover:bg-[#FAF5EB]/20 transition-colors"
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span>{supabaseConnected ? 'Supabase Connected' : 'Connect Supabase'}</span>
+            </button>
             <span className="text-[#FAF5EB]/50">© {new Date().getFullYear()} {settings.brandName}</span>
           </div>
         </div>
@@ -1026,6 +1040,15 @@ export default function App() {
       <CustomOrderModal
         open={customOrderOpen}
         onClose={() => setCustomOrderOpen(false)}
+      />
+
+      <SupabaseConnectModal
+        open={supabaseModalOpen}
+        onClose={() => setSupabaseModalOpen(false)}
+        onConnectionChanged={() => {
+          setSupabaseConnected(Boolean(getSavedSupabaseConfig()));
+          void refreshStore();
+        }}
       />
     </div>
   );

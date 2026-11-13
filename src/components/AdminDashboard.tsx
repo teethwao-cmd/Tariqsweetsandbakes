@@ -16,7 +16,6 @@ import {
   X,
 } from 'lucide-react';
 import { IMAGE_LIBRARY_OPTIONS } from '../data/seedCatalog.ts';
-import { getSavedSupabaseConfig } from '../lib/supabaseClient.ts';
 import {
   adminLogin,
   createProduct,
@@ -43,11 +42,12 @@ import {
 } from '../types.ts';
 import { buildWhatsAppUrl, formatPKR } from '../utils/formatters.ts';
 import { ResilientImage } from './ResilientImage.tsx';
-import { SupabaseConnectModal } from './SupabaseConnectModal.tsx';
 
 interface AdminDashboardProps {
   onExitAdmin: () => void;
   onStoreUpdated: () => void;
+  onOpenSupabaseModal: () => void;
+  supabaseConnected: boolean;
 }
 
 type AdminTab = 'overview' | 'orders' | 'products' | 'coupons' | 'settings';
@@ -55,6 +55,8 @@ type AdminTab = 'overview' | 'orders' | 'products' | 'coupons' | 'settings';
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onExitAdmin,
   onStoreUpdated,
+  onOpenSupabaseModal,
+  supabaseConnected,
 }) => {
   const [authenticated, setAuthenticated] = useState(Boolean(getAdminToken()));
   const [username, setUsername] = useState('admin');
@@ -66,8 +68,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [data, setData] = useState<StoreData | null>(null);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState('');
-  const [supabaseModalOpen, setSupabaseModalOpen] = useState(false);
-  const [supabaseConnected, setSupabaseConnected] = useState(Boolean(getSavedSupabaseConfig()));
 
   // Product search & editor modal
   const [productQuery, setProductQuery] = useState('');
@@ -338,15 +338,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </button>
           </form>
 
-          <div className="pt-4 border-t border-[#2C1A12]/10 flex items-center justify-between text-xs text-[#6B4E3D]">
-            <span>Demo credentials: admin / tariq2026</span>
+          <div className="pt-4 border-t border-[#2C1A12]/10 space-y-3">
             <button
               type="button"
-              onClick={onExitAdmin}
-              className="font-semibold text-[#2C1A12] hover:underline"
+              onClick={onOpenSupabaseModal}
+              className="w-full h-11 rounded-xl bg-[#FAF5EB] border border-[#D4941A]/45 text-xs font-semibold text-[#2C1A12] hover:bg-[#F3E9D4] inline-flex items-center justify-center gap-2 transition-colors"
             >
-              Back to Store
+              <Database className="w-4 h-4 text-[#9A650B]" />
+              <span>{supabaseConnected ? 'Supabase Connected — Manage' : 'Connect Supabase'}</span>
             </button>
+
+            <div className="flex items-center justify-between text-xs text-[#6B4E3D]">
+              <span>Demo credentials: admin / tariq2026</span>
+              <button
+                type="button"
+                onClick={onExitAdmin}
+                className="font-semibold text-[#2C1A12] hover:underline"
+              >
+                Back to Store
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -387,7 +398,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               type="button"
-              onClick={() => setSupabaseModalOpen(true)}
+              onClick={onOpenSupabaseModal}
               className="inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-[#FAF5EB] border border-[#D4941A]/45 text-xs font-semibold text-[#2C1A12] hover:bg-[#F3E9D4]"
             >
               <Database className="w-4 h-4 text-[#9A650B]" />
@@ -1043,7 +1054,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                   <button
                     type="button"
-                    onClick={() => setSupabaseModalOpen(true)}
+                    onClick={onOpenSupabaseModal}
                     className="w-full h-11 rounded-xl bg-[#2C1A12] text-[#FFFDF9] text-xs font-semibold hover:bg-[#44291D] inline-flex items-center justify-center gap-2"
                   >
                     <Database className="w-4 h-4 text-[#E5A93B]" />
@@ -1272,15 +1283,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       )}
 
-      <SupabaseConnectModal
-        open={supabaseModalOpen}
-        onClose={() => setSupabaseModalOpen(false)}
-        onConnectionChanged={() => {
-          setSupabaseConnected(Boolean(getSavedSupabaseConfig()));
-          void loadDashboard();
-          onStoreUpdated();
-        }}
-      />
     </div>
   );
 };
